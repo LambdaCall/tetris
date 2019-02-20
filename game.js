@@ -20,23 +20,69 @@ function resizeCanvas(){
     draw();
 }
 
-function draw(){
-    drawTetromino(T,{x:5,y:0})
-}
-
 
 
 
 // Tetromino related
-
-const T = {
-    shape : [
-        [0,0,0],
-        [0,1,0],
-        [1,1,1]
-    ],
-    color : "red"
-}
+const tetrominos = [
+     { //I Shape
+        shape : [
+            [0, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 1, 0, 0]
+        ],
+        color : "skyblue"
+    },
+    { //L Shape
+        shape : [
+            [0, 2, 0],
+            [0, 2, 0],
+            [0, 2, 2],
+        ],
+        color : "orange"
+    },
+    { //J Shape
+        shape : [
+            [0, 3, 0],
+            [0, 3, 0],
+            [3, 3, 0],
+        ],
+        color : "pink"
+    },
+    { //O Shape
+        shape : [
+            [4, 4],
+            [4, 4],
+        ],
+        color : "yellow"
+    },
+    { //Z Shape
+        shape : [ 
+            [5, 5, 0],
+            [0, 5, 5],
+            [0, 0, 0],
+        ],
+        color : "red"
+    },
+    
+    { //S Shape
+        shape : [ 
+            [0, 6, 6],
+            [6, 6, 0],
+            [0, 0, 0],
+        ],
+        color : "green"
+    },
+    { //T Shape
+            shape : [
+                [7,7,7],
+                [0,7,0],
+                [0,0,0]
+            ],
+            color : "purple"
+        }
+]
 
 function drawTetromino(tetromino,offset){
     tetromino.shape.forEach((row,y)=>{
@@ -44,7 +90,7 @@ function drawTetromino(tetromino,offset){
             if(value){ //Check if we have a non-0 value at this position
                 ctx.fillStyle = tetromino.color;
                 ctx.fillRect(x+offset.x,y+offset.y,1,1);
-                ctx.stroke();
+            
             }
         })
     })
@@ -52,11 +98,25 @@ function drawTetromino(tetromino,offset){
 
 
 
+
+
+
 // Player's Object
 const player ={
     pos: { x: 5, y: 0},
-    piece: T
+    tetromino: tetrominos[Math.floor(Math.random() * 7)]
 }
 
 
-resizeCanvas()
+
+function tick(){
+
+}
+
+function draw(){
+    console.log(player.tetromino)
+    drawTetromino(player.tetromino,{x:5,y:0})
+}
+
+
+resizeCanvas();
