@@ -82,11 +82,12 @@ function resetPlayer(){
     player.tetromino = getTetromino();
     player.pos = {x : ((board[0].length/2 | 0) - player.tetromino.shape[0].length/2 | 0),
                   y: 0}
-    console.log(player.pos)
+
     //Check for lose condition
     if(collisions(board,player)){
         board.forEach(row => row.fill(0)) //Reset board
     }
+    clearLines();
 }
 
 function getTetromino(){
@@ -237,6 +238,22 @@ function update(time = 0){
     requestAnimationFrame(update); //Call update before next frame
 }
 
+function clearLines() {
+    let rowCount = 1;
+    outer: for (let y = board.length -1; y > 0; --y) {
+        for (let x = 0; x < board[y].length; ++x) {
+            if (board[y][x] === 0) {
+                continue outer;
+            }
+        }
+
+        const row = board.splice(y, 1)[0].fill(0);
+        board.unshift(row);
+        ++y;
+
+        rowCount *= 2;
+    }
+}
 
 
 //Event Handlers
