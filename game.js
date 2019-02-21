@@ -82,6 +82,7 @@ function resetPlayer(){
     player.tetromino = getTetromino();
     player.pos = {x : ((board[0].length/2 | 0) - player.tetromino.shape[0].length/2 | 0),
                   y: 0}
+    console.log(player.pos)
     //Check for lose condition
     if(collisions(board,player)){
         board.forEach(row => row.fill(0)) //Reset board
@@ -121,7 +122,10 @@ function drawMatrix(matrix,offset){
     matrix.forEach((row,y)=>{
         row.forEach((value,x)=>{
             if(value){ //Check if we have a non-0 value at this position
-                ctx.fillStyle = tetrominos[value].color;
+                if(value === tetrominos.length) 
+                    ctx.fillStyle = tetrominos[value-1].color
+                else
+                    ctx.fillStyle = tetrominos[value].color ;
                 ctx.fillRect(x+offset.x,y+offset.y,1,1);
             }
         })
@@ -144,13 +148,13 @@ function collisions(board,player){
     const o = player.pos;
     for (let y = 0; y < m.length; ++y) {
         for (let x = 0; x < m[y].length; ++x) {
-            if (m[y][x] !== 0 &&
-               (board[y + o.y] &&
-                board[y + o.y][x + o.x]) !== 0) {
+            if (m[y][x] !== 0 && //Check if this position has a value
+               (board[y + o.y] && //Check if it's a valid row
+                board[y + o.y][x + o.x]) !== 0) { //Check if there's a non-zero value at this position, Note: We need valid row and non-zero value for this check
                 return true;
             }
         }
-}
+    }
     return false; //Else we do not
 }
 
@@ -167,8 +171,7 @@ function moveTetrominoDown(){
     if(collisions(board,player)){
         player.pos.y--;
         updateState(board,player);
-        player.tetromino = getTetromino();
-        player.pos = {x:5,y:0}
+        resetPlayer();
     }
 }
 
@@ -186,7 +189,6 @@ function updateState(board,player){
             }
         })
     })
-    console.log("UpdateState")
 }
 
 function update(time = 0){
