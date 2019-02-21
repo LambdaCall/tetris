@@ -8,7 +8,7 @@ let lastTime = 0;
 
 let scaleFactor = 20
 
-let board = createMatrix(canvas.width/scaleFactor,canvas.height/scaleFactor)
+const board = createMatrix(canvas.width/scaleFactor,canvas.height/scaleFactor)
 
 // Tetrominos
 const tetrominos = [
@@ -78,6 +78,16 @@ const player ={
     tetromino: getTetromino()
 }
 
+function resetPlayer(){
+    player.tetromino = getTetromino();
+    player.pos = {x : ((board[0].length/2 | 0) - player.tetromino.shape[0].length/2 | 0),
+                  y: 0}
+    //Check for lose condition
+    if(collisions(board,player)){
+        board.forEach(row => row.fill(0)) //Reset board
+    }
+}
+
 function getTetromino(){
         return tetrominos[Math.floor(Math.random() * 7)]
 }
@@ -103,8 +113,19 @@ function draw(){
     //Draw a black canvas
     ctx.fillStyle = '#000'; 
     ctx.fillRect(0,0,canvas.width,canvas.height);
-    //Draw the current Tetromino of the player
-    drawTetromino(player.tetromino,player.pos)
+    drawMatrix(board,{x:0,y:0}) //Draw the board
+    drawMatrix(player.tetromino.shape,player.pos) //Draw the active Player Tetronmino
+}
+
+function drawMatrix(matrix,offset){
+    matrix.forEach((row,y)=>{
+        row.forEach((value,x)=>{
+            if(value){ //Check if we have a non-0 value at this position
+                ctx.fillStyle = tetrominos[value].color;
+                ctx.fillRect(x+offset.x,y+offset.y,1,1);
+            }
+        })
+    })
 }
 
 function drawTetromino(tetromino,offset){
@@ -119,33 +140,35 @@ function drawTetromino(tetromino,offset){
 }
 
 function collisions(board,player){
-    const [tetromino,pos] = [player.tetromino.shape,player.pos]
-    for(let y = 0; y < tetromino.length;++y){ //Looping through the rows of the tetromino's shape
-        for(let x = 0; x < tetromino[y].length;++x){ //Looping through the "columns" of each row
-            if(tetromino[y][x] !== 0 && //If at this position, is there a valid shape piece
-            (board[y + pos.y] && //If there such a row in the board
-            board[y + pos.y][x + pos.x] !== 0 ) //If there a non-zero element at this position on the board
-            ){
-            return true; //We have a collision
+    const m = player.tetromino.shape;
+    const o = player.pos;
+    for (let y = 0; y < m.length; ++y) {
+        for (let x = 0; x < m[y].length; ++x) {
+            if (m[y][x] !== 0 &&
+               (board[y + o.y] &&
+                board[y + o.y][x + o.x]) !== 0) {
+                return true;
             }
         }
-    }
+}
     return false; //Else we do not
 }
 
 function moveTetromino(offset){
     player.pos.x += offset; //Assume no collision
     if(collisions(board,player)){ 
-        console.log("??")
         player.pos.x -= offset; //We found a collision, undo what we just did
     }
 }
+
 
 function moveTetrominoDown(){
     player.pos.y++;
     if(collisions(board,player)){
         player.pos.y--;
         updateState(board,player);
+        player.tetromino = getTetromino();
+        player.pos = {x:5,y:0}
     }
 }
 
@@ -168,6 +191,7 @@ function updateState(board,player){
 
 function update(time = 0){
     const deltaTime = time - lastTime;
+    
     dropCounter += deltaTime;
     if(dropCounter > dropInterval){
         tick();
