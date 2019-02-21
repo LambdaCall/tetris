@@ -6,9 +6,7 @@ let dropCounter = 0;
 let dropInterval = 1000; //This is in MS, 1000 = 1 second
 let lastTime = 0;
 
-
 let scaleFactor = 20
-
 
 const board = createMatrix(canvas.width/scaleFactor,canvas.height/scaleFactor)
 
@@ -120,19 +118,42 @@ function drawTetromino(tetromino,offset){
     })
 }
 
+function collisions(){
+
+}
 
 function moveTetromino(offset){
     //This should only affect the x cor
     let newX = player.pos.x + offset
+    player.pos.x = newX;
+    updateState()
     //TODO check for collisions
+    if(collisions()){
+        
+        updateState();
+    }
+}
+
+function moveTetrominoDown(){
+    player.pos.y++;
 }
 
 function tick(){
-    player.pos.y++; //Increase the Y value
+    moveTetrominoDown(); //Increase the Y value
+    updateState();
     //Check the bounds
     dropCounter = 0; //Reset the counter otherwise the piece will free fall
 }
 
+function updateState(){
+    player.tetromino.shape.forEach((row,y)=>{
+        row.forEach((value,x)=>{
+            if(value){
+                board[y + player.pos.y][x + player.pos.x] = value;
+            }
+        })
+    })
+}
 
 function update(time = 0){
     const deltaTime = time - lastTime;
@@ -141,7 +162,7 @@ function update(time = 0){
         tick();
     }
     lastTime = time;
-    draw()
+    draw();
     requestAnimationFrame(update); //Call update before next frame
 }
 
@@ -152,12 +173,14 @@ window.addEventListener('resize',resizeCanvas,false)  //Handles resizes
 window.addEventListener('keydown',event=>{
     switch(event.keyCode){
         case 37: //Left arrow
-            moveTetromino(-1)
+            moveTetromino(-1);
             break;
         case 39: //Right arrow
-            moveTetromino(1)
+            moveTetromino(1);
             break;
-       
+        case 40:
+            moveTetrominoDown();
+            break;
     }
 })
 resizeCanvas();
