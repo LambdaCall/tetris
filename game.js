@@ -175,9 +175,43 @@ function moveTetrominoDown(){
     }
 }
 
+function rotate(matrix, dir) {
+    for (let y = 0; y < matrix.length; ++y) {
+        for (let x = 0; x < y; ++x) {
+            [
+                matrix[x][y],
+                matrix[y][x],
+            ] = [
+                matrix[y][x],
+                matrix[x][y],
+            ];
+        }
+    }
+
+    if (dir > 0) {
+        matrix.forEach(row => row.reverse());
+    } else {
+        matrix.reverse();
+    }
+}
+
+function playerRotate(dir) {
+    const pos = player.pos.x;
+    let offset = 1;
+    rotate(player.tetromino.shape, dir);
+    while (collisions(board, player)) {
+        player.pos.x += offset;
+        offset = -(offset + (offset > 0 ? 1 : -1));
+        if (offset > player.tetromino.shape[0].length) {
+            rotate(player.tetromino, -dir);
+            player.pos.x = pos;
+            return;
+        }
+    }
+}
+
 function tick(){
     moveTetrominoDown(); //Increase the Y value
-    //Check the bounds
     dropCounter = 0; //Reset the counter otherwise the piece will free fall
 }
 
@@ -215,8 +249,14 @@ window.addEventListener('keydown',event=>{
         case 39: //Right arrow
             moveTetromino(1);
             break;
-        case 40:
+        case 40: //Down arrow
             moveTetrominoDown();
+            break;
+        case 90: //Z key
+            playerRotate(-1);
+            break;
+        case 88: //X key
+            playerRotate(1);
             break;
     }
 })
