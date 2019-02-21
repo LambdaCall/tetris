@@ -8,7 +8,7 @@ let lastTime = 0;
 
 let scaleFactor = 20
 
-const board = createMatrix(canvas.width/scaleFactor,canvas.height/scaleFactor)
+let board = createMatrix(canvas.width/scaleFactor,canvas.height/scaleFactor)
 
 // Tetrominos
 const tetrominos = [
@@ -118,34 +118,44 @@ function drawTetromino(tetromino,offset){
     })
 }
 
-function collisions(){
-
+function collisions(board,player){
+    const [tetromino,pos] = [player.tetromino.shape,player.pos]
+    for(let y = 0; y < tetromino.length;++y){ //Looping through the rows of the tetromino's shape
+        for(let x = 0; x < tetromino[y].length;++x){ //Looping through the "columns" of each row
+            if(tetromino[y][x] !== 0 && //If at this position, is there a valid shape piece
+            (board[y + pos.y] && //If there such a row in the board
+            board[y + pos.y][x + pos.x] !== 0 ) //If there a non-zero element at this position on the board
+            ){
+            return true; //We have a collision
+            }
+        }
+    }
+    return false; //Else we do not
 }
 
 function moveTetromino(offset){
-    //This should only affect the x cor
-    let newX = player.pos.x + offset
-    player.pos.x = newX;
-    updateState()
-    //TODO check for collisions
-    if(collisions()){
-        
-        updateState();
+    player.pos.x += offset; //Assume no collision
+    if(collisions(board,player)){ 
+        console.log("??")
+        player.pos.x -= offset; //We found a collision, undo what we just did
     }
 }
 
 function moveTetrominoDown(){
     player.pos.y++;
+    if(collisions(board,player)){
+        player.pos.y--;
+        updateState(board,player);
+    }
 }
 
 function tick(){
     moveTetrominoDown(); //Increase the Y value
-    updateState();
     //Check the bounds
     dropCounter = 0; //Reset the counter otherwise the piece will free fall
 }
 
-function updateState(){
+function updateState(board,player){
     player.tetromino.shape.forEach((row,y)=>{
         row.forEach((value,x)=>{
             if(value){
@@ -153,6 +163,7 @@ function updateState(){
             }
         })
     })
+    console.log("UpdateState")
 }
 
 function update(time = 0){
